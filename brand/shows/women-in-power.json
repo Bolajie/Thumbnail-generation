@@ -1,0 +1,12 @@
+{
+  "showName": "Women in Power",
+  "primaryColour": "#E8C96B",
+  "accentColour": "#C9A84C",
+  "recommendedTemplate": "ornate",
+  "defaultOverlays": [
+    "gold-frame.png",
+    "floral-gold.png"
+  ],
+  "badgePath": "/brand/assets/badges/women-in-power-badge.png",
+  "pexelsKeywordModifier": "powerful elegant leadership premium"
+}

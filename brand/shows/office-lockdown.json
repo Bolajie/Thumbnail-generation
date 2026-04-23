@@ -1,0 +1,12 @@
+{
+  "showName": "Office Lockdown",
+  "primaryColour": "#C9A84C",
+  "accentColour": "#A07830",
+  "recommendedTemplate": "tactical",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/office-lockdown-badge.png",
+  "pexelsKeywordModifier": "office corporate intense dramatic"
+}

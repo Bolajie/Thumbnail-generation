@@ -1,0 +1,13 @@
+node_modules/
+.env
+dist/
+output/*.png
+*.log
+.DS_Store
+Thumbs.db
+
+# Sharp native binaries downloaded on install
+build/
+
+# @imgly model cache (downloaded on first bg-removal run, ~200 MB)
+.imgly/

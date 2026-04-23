@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import AssetUpload from './AssetUpload';
+import InputForm from './InputForm';
+import GenerateButton from './GenerateButton';
+import ThumbnailGrid from './ThumbnailGrid';
+
+export default function Dashboard() {
+  const [photo, setPhoto] = useState(null);
+  const [formData, setFormData] = useState({
+    guestName: '',
+    industry: '',
+    show: '',
+    style: '',
+    duration: ''
+  });
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [results, setResults] = useState(null);
+  const [globalError, setGlobalError] = useState(null);
+
+  const isFormComplete = photo && formData.guestName && formData.industry && formData.show && formData.style && formData.duration;
+
+  const handleGenerate = async () => {
+    setLoadingStage(1);
+    setGlobalError(null);
+    setResults(null);
+    
+    try {
+      // Setup mock API progress simulator for UI since we only interact with the backend over HTTP in production
+      // In a real app this would hit `/api/generate` and potentially use SSE or WebSockets for stage updates.
+      // We will simulate stage progress linearly before making the fetch request for simplicity in this pure React demo.
+      
+      const simulateProgress = async () => {
+        setLoadingStage(1); await new Promise(r => setTimeout(r, 600));
+        setLoadingStage(2); await new Promise(r => setTimeout(r, 800));
+        setLoadingStage(3); await new Promise(r => setTimeout(r, 1000));
+        setLoadingStage(4); await new Promise(r => setTimeout(r, 1500));
+        setLoadingStage(5);
+      };
+
+      simulateProgress();
+
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo, ...formData })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        throw new Error(data.message || 'Pipeline failed to generate thumbnails.');
+      }
+
+      setResults(data.variations);
+      setLoadingStage(0);
+    } catch (err) {
+      setGlobalError(err.message);
+      setLoadingStage(0);
+    }
+  };
+
+  return (
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: '#080808',
+      color: '#FFFFFF'
+    }}>
+      {/* Editor Input Panel */}
+      <div style={{
+        width: '420px',
+        background: '#111111',
+        borderRight: '1px solid #1E1E1E',
+        padding: '2.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
+        boxShadow: '4px 0 20px rgba(0,0,0,0.5)'
+      }}>
+        <h1 style={{ 
+          fontFamily: 'Montserrat, sans-serif', 
+          fontSize: '22px', 
+          margin: '0 0 2rem 0', 
+          color: '#C9A84C',
+          letterSpacing: '1px',
+          fontWeight: 800
+        }}>
+          ISTV ENGINE <span style={{ color: '#080808', fontWeight: 'bold', fontSize: '11px', background: '#C9A84C', padding: '3px 6px', borderRadius: '4px', verticalAlign: 'middle', marginLeft: '8px' }}>v2.1</span>
+        </h1>
+        
+        <AssetUpload onUpload={setPhoto} />
+        <InputForm formData={formData} setFormData={setFormData} />
+        
+        <div style={{ flexGrow: 1 }} />
+        
+        <GenerateButton 
+          onClick={handleGenerate} 
+          disabled={!isFormComplete} 
+          loadingStage={loadingStage}
+          error={globalError}
+        />
+      </div>
+
+      {/* Results Panel */}
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        <ThumbnailGrid results={results} isLoading={loadingStage > 0} />
+      </div>
+    </div>
+  );
+}

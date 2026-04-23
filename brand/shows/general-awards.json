@@ -1,0 +1,13 @@
+{
+  "showName": "General / Awards",
+  "primaryColour": "#C9A84C",
+  "accentColour": "#E8C96B",
+  "recommendedTemplate": "ornate",
+  "defaultOverlays": [
+    "gold-frame.png",
+    "floral-gold.png",
+    "light-rays.png"
+  ],
+  "badgePath": "/brand/assets/badges/general-awards-badge.png",
+  "pexelsKeywordModifier": "awards ceremony stage spotlight gala"
+}

@@ -1,0 +1,11 @@
+{
+  "showName": "America's Top Lawyer",
+  "primaryColour": "#FFFFFF",
+  "accentColour": "#C9A84C",
+  "recommendedTemplate": "legacy",
+  "defaultOverlays": [
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/americas-top-lawyer-badge.png",
+  "pexelsKeywordModifier": "courtroom legal authoritative serious"
+}

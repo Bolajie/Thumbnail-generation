@@ -1,0 +1,12 @@
+{
+  "showName": "Operation CEO",
+  "primaryColour": "#A07830",
+  "accentColour": "#FFFFFF",
+  "recommendedTemplate": "tactical",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/operation-ceo-badge.png",
+  "pexelsKeywordModifier": "boardroom executive modern slick"
+}

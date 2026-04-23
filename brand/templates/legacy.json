@@ -1,0 +1,22 @@
+{
+  "guestPosition": {
+    "x": "centre-left",
+    "y": "bottom",
+    "scale": "full-body"
+  },
+  "textPosition": {
+    "x": "centre",
+    "y": "lower"
+  },
+  "overlayList": [
+    "dark-vignette.png"
+  ],
+  "colourGradeConfig": {
+    "tint": "#080808",
+    "opacity": 0.6
+  },
+  "badgePosition": {
+    "x": "right",
+    "y": "top"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "showName": "Legacy Makers",
+  "primaryColour": "#C9A84C",
+  "accentColour": "#FFFFFF",
+  "recommendedTemplate": "legacy",
+  "defaultOverlays": [
+    "dark-vignette.png",
+    "gold-divider.png"
+  ],
+  "badgePath": "/brand/assets/badges/legacy-makers-badge.png",
+  "pexelsKeywordModifier": "legacy historical success classic"
+}

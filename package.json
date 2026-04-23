@@ -1,0 +1,33 @@
+{
+  "name": "istv-thumbnail-engine",
+  "version": "2.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "server": "node app/server/index.js",
+    "server:dev": "node --watch-path=app/server app/server/index.js",
+    "client": "vite app/client --port 5173",
+    "dev": "concurrently -n server,client -c yellow,cyan \"npm run server:dev\" \"npm run client\"",
+    "build": "vite build app/client",
+    "install:all": "npm install"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@imgly/background-removal-node": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "file-saver": "^2.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "vite": "^5.4.11"
+  },
+  "overrides": {
+    "sharp": "^0.33.5"
+  }
+}

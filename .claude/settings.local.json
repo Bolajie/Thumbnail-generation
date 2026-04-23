@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(node -e ' *)",
+      "Bash(node app/server/index.js)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(kill %1)",
+      "Bash(npm ls *)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')",
+      "Bash(xargs -I{} taskkill //PID {} //F)",
+      "Bash(curl -s \"http://localhost:5174/Dashboard.jsx\")",
+      "Bash(curl -s \"http://localhost:5174/ThumbnailCard.jsx\")",
+      "Bash(taskkill //PID 19136 //F)",
+      "Bash(curl -s http://localhost:5173/)",
+      "Bash(git -C \"c:/Users/Bolaji Ilori/Documents/istv thumbnail project\" remote -v)",
+      "Bash(git config *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}

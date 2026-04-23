@@ -1,0 +1,23 @@
+{
+  "guestPosition": {
+    "x": "right",
+    "y": "bottom",
+    "scale": "large"
+  },
+  "textPosition": {
+    "x": "left",
+    "y": "centre"
+  },
+  "overlayList": [
+    "geometric-lines.png",
+    "dark-vignette.png"
+  ],
+  "colourGradeConfig": {
+    "tint": "#080808",
+    "opacity": 0.5
+  },
+  "badgePosition": {
+    "x": "left",
+    "y": "top"
+  }
+}

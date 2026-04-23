@@ -1,0 +1,23 @@
+{
+  "guestPosition": {
+    "x": "centre",
+    "y": "centre",
+    "scale": "bust"
+  },
+  "textPosition": {
+    "x": "centre",
+    "y": "lower-third"
+  },
+  "overlayList": [
+    "gold-frame.png",
+    "floral-gold.png"
+  ],
+  "colourGradeConfig": {
+    "tint": "#C9A84C",
+    "opacity": 0.3
+  },
+  "badgePosition": {
+    "x": "left",
+    "y": "top"
+  }
+}
