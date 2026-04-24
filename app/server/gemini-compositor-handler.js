@@ -1,5 +1,10 @@
 const fs = require('fs').promises;
 const path = require('path');
+const sharp = require('sharp');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const geminiModel = genAI.getGenerativeModel({ model: 'gemini-3-pro-image' });
 
 /**
  * Stage 4a: Gemini Compositor Handler
@@ -47,34 +52,26 @@ async function processGeminiCompositorStage({ variations, backgrounds, transpare
           .replace('{{GOLD_COLOUR}}', showPreset.primaryColour)
           .replace('{{LIGHT_DIRECTION}}', instruction.geminiPrompt || 'cinematic studio lighting');
 
-        // Mocking Nano Banana Pro API with local Sharp compositing for end-to-end testing
-        const sharp = require('sharp');
-        
-        const tintColour = instruction.colourGrade?.tint || templateLayout.colourGradeConfig?.tint || '#000000';
-        const tintOpacity = instruction.colourGrade?.opacity || templateLayout.colourGradeConfig?.opacity || 0.5;
-        
-        const bg = await sharp(backgroundBuffer).resize(1280, 720, { fit: 'cover' }).toBuffer();
-        const tint = Buffer.from(`<svg width="1280" height="720"><rect x="0" y="0" width="1280" height="720" fill="${tintColour}" fill-opacity="${tintOpacity}" /></svg>`);
-        const overlay = await sharp(overlayBuffer).resize(1280, 720, { fit: 'cover' }).toBuffer();
-        
-        // Use a generic resize for guest based on template
-        let guestWidth = 800;
-        let gravity = 'center';
-        if (instruction.templateId === 'legacy') { guestWidth = 600; gravity = 'west'; }
-        if (instruction.templateId === 'tactical') { guestWidth = 700; gravity = 'east'; }
+        // Stage 4a — Nano Banana Pro (Gemini multimodal compositor)
+        const result = await geminiModel.generateContent([
+          finalPrompt,
+          { inlineData: { data: backgroundBuffer.toString('base64'), mimeType: 'image/jpeg' } },
+          { inlineData: { data: transparentGuestPng.toString('base64'), mimeType: 'image/png' } },
+          { inlineData: { data: overlayBuffer.toString('base64'), mimeType: 'image/png' } }
+        ]);
 
-        const guest = await sharp(transparentGuestPng).resize({ width: guestWidth }).toBuffer();
-        
-        const composited = await sharp(bg)
-          .composite([
-            { input: tint, blend: 'over' },
-            { input: overlay, blend: 'screen' },
-            { input: guest, gravity: gravity, blend: 'over' }
-          ])
-          .png()
-          .toBuffer();
-          
-        return composited;
+        const imagePart = result.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (!imagePart) throw new Error('No image returned in Gemini response');
+
+        let outputBuffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+        // Guarantee exactly 1280×720 — resize if Gemini returns different dimensions
+        const meta = await sharp(outputBuffer).metadata();
+        if (meta.width !== 1280 || meta.height !== 720) {
+          outputBuffer = await sharp(outputBuffer).resize(1280, 720, { fit: 'cover' }).toBuffer();
+        }
+
+        return outputBuffer;
       } catch (error) {
         const stageError = new Error(`STAGE4A_ERROR: Variation ${index} failed.`);
         stageError.stage = 'STAGE4A_ERROR';
