@@ -25,7 +25,7 @@ async function processBackgroundRemoval({ photo }) {
 
     // Remove background — isnet_quint8 uses ~75% less RAM than the default isnet model
     const resultBlob = await removeBackground(tmpPath, {
-      model: 'isnet_quint8',
+      model: 'small',
       output: { format: 'image/png' }
     });
     await fs.unlink(tmpPath).catch(() => {});
