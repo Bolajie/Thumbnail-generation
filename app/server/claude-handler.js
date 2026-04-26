@@ -72,16 +72,19 @@ async function processClaudeStage({ guestName, industry, show, style, duration }
     }
 
     const requiredFields = [
-      'pexelsQuery', 
-      'templateId', 
-      'colourGrade', 
-      'guestPosition', 
-      'overlayAsset', 
-      'geminiPrompt', 
+      'pexelsQuery',
+      'pexelsQueryTexture',
+      'templateId',
+      'colourGrade',
+      'guestPosition',
+      'overlayAsset',
+      'moodAtmosphere',
+      'geminiPrompt',
       'textStyle'
     ];
-    
-    const validTemplates = ['legacy', 'ornate', 'tactical'];
+
+    const validTemplates   = ['legacy', 'ornate', 'tactical'];
+    const validAtmospheres = ['orange-sparks.png', 'anamorphic-flare.png', 'film-grain.png', 'none'];
 
     instructions.forEach((instruction, index) => {
       for (const field of requiredFields) {
@@ -91,6 +94,10 @@ async function processClaudeStage({ guestName, industry, show, style, duration }
       }
       if (!validTemplates.includes(instruction.templateId)) {
         throw new Error(`Variation at index ${index} has invalid templateId: ${instruction.templateId}`);
+      }
+      if (!validAtmospheres.includes(instruction.moodAtmosphere)) {
+        // Soft-fail: default to 'none' rather than rejecting the whole pipeline
+        instruction.moodAtmosphere = 'none';
       }
     });
 
