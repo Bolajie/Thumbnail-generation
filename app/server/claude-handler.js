@@ -57,7 +57,8 @@ async function processClaudeStage({ guestName, industry, show, style, duration }
       }
     }
 
-    // 8. Parse JSON
+    // 8. Parse JSON — strip trailing commas Claude occasionally emits
+    responseText = responseText.replace(/,\s*([\]}])/g, '$1');
     let instructions;
     try {
       instructions = JSON.parse(responseText);
