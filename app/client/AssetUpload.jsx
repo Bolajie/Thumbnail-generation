@@ -1,5 +1,26 @@
 import React, { useState, useCallback } from 'react';
 
+// Resize a blob to max maxWidth pixels wide, preserving aspect ratio
+async function resizeBlobToMax(blob, maxWidth) {
+  const bitmap = await createImageBitmap(blob);
+  const scale  = Math.min(1, maxWidth / bitmap.width);
+  const w = Math.round(bitmap.width  * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width  = w;
+  canvas.height = h;
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+function blobToDataUrl(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function AssetUpload({ onUpload }) {
   const [preview, setPreview]   = useState(null);
   const [error, setError]       = useState(null);
@@ -16,11 +37,7 @@ export default function AssetUpload({ onUpload }) {
     }
     setError(null);
 
-    const originalUrl = await new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
+    const originalUrl = await blobToDataUrl(file);
     setPreview(originalUrl);
     setRemoving(true);
 
@@ -31,16 +48,16 @@ export default function AssetUpload({ onUpload }) {
         output: { format: 'image/png' }
       });
 
-      const transparentUrl = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(transparentBlob);
-      });
+      // Resize transparent PNG to max 1280px wide — keeps request body under ~1MB
+      const resizedBlob    = await resizeBlobToMax(transparentBlob, 1280);
+      const transparentUrl = await blobToDataUrl(resizedBlob);
 
       setPreview(transparentUrl);
-      onUpload({ original: originalUrl, transparent: transparentUrl });
+      // Only pass transparent — server doesn't need the original when bg removal succeeded
+      onUpload({ original: null, transparent: transparentUrl });
     } catch (err) {
       console.warn('Client bg removal failed, server will handle it:', err.message);
+      // Pass original photo only as fallback for server-side removal
       onUpload({ original: originalUrl, transparent: null });
     } finally {
       setRemoving(false);
