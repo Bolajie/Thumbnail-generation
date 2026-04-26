@@ -48,8 +48,7 @@ export default function Dashboard() {
 
       simulateProgress();
 
-      // Wait for the server to be fully awake — retry health check up to 12x (60 seconds)
-      // This handles cold starts on Render free tier before sending the heavy request
+      // Wait for server to be fully awake (handles Render free-tier cold starts)
       let serverReady = false;
       for (let i = 0; i < 12; i++) {
         try {
@@ -58,40 +57,35 @@ export default function Dashboard() {
         } catch (_) {}
         await new Promise(r => setTimeout(r, 5000));
       }
-      if (!serverReady) throw new Error('Server did not respond — please try again in 30 seconds.');
+      if (!serverReady) throw new Error('Server did not respond — please try again.');
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3 * 60 * 1000); // 3 min timeout
+      // Start the pipeline — server responds instantly with a jobId
+      const startRes = await fetch(window.location.origin + '/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photo, transparentPng, ...formData })
+      });
+      if (!startRes.ok) throw new Error('Failed to start generation.');
+      const { jobId } = await startRes.json();
 
-      let response;
-      try {
-        response = await fetch(window.location.origin + '/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ photo, transparentPng, ...formData }),
-          signal: controller.signal
-        });
-      } finally {
-        clearTimeout(timeoutId);
+      // Poll for result — each poll is a fast request, no iOS timeout issue
+      let data = null;
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 3000));
+        const pollRes = await fetch(window.location.origin + '/api/jobs/' + jobId);
+        const job = await pollRes.json();
+        if (job.status === 'complete') { data = job.data; break; }
+        if (job.status === 'failed') throw new Error(job.error || 'Pipeline failed.');
+        if (job.status === 'not_found') throw new Error('Server restarted during processing — please try again.');
       }
-
-      const data = await response.json();
-
-      if (!response.ok || data.error) {
-        throw new Error(data.message || 'Pipeline failed to generate thumbnails.');
-      }
+      if (!data) throw new Error('Generation timed out — please try again.');
 
       setResults(data.variations);
       setLoadingStage(0);
     } catch (err) {
       const msg = err.message || '';
-      const isAbort = err.name === 'AbortError';
-      const isNetworkCrash = msg.includes('Load failed') || msg.includes('expected pattern') || msg.includes('NetworkError') || msg.includes('Failed to fetch');
-      setGlobalError(isAbort
-        ? 'Generation timed out — the server may be warming up. Please try again.'
-        : isNetworkCrash
-          ? 'Server is busy or restarting — please wait 30 seconds and try again.'
-          : msg);
+      const isNetworkCrash = msg.includes('Load failed') || msg.includes('NetworkError') || msg.includes('Failed to fetch');
+      setGlobalError(isNetworkCrash ? 'Server is warming up — please wait 30 seconds and try again.' : msg);
       setLoadingStage(0);
     }
   };
