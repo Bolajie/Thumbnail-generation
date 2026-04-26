@@ -7,7 +7,9 @@ const { processSharpTypographyStage } = require('./sharp-typography-handler');
 const t = () => `[${new Date().toISOString()}]`;
 
 async function runPipeline({ photo, transparentPng: clientTransparentPng, guestName, industry, show, style, duration }) {
-  if (!photo) throw Object.assign(new Error('Missing guest photo.'), { stage: 'STAGE0' });
+  if (!photo && !clientTransparentPng) {
+    throw Object.assign(new Error('Missing guest photo.'), { stage: 'STAGE0' });
+  }
 
   // STAGE 1
   let transparentPng;

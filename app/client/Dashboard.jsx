@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [results, setResults] = useState(null);
   const [globalError, setGlobalError] = useState(null);
 
-  const isFormComplete = photo && transparentPng !== undefined && formData.guestName && formData.industry && formData.show && formData.style && formData.duration;
+  const isFormComplete = (photo || transparentPng) && formData.guestName && formData.industry && formData.show && formData.style && formData.duration;
 
   const handleGenerate = async () => {
     setLoadingStage(1);
