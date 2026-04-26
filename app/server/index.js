@@ -2,6 +2,7 @@
 
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 
+const path    = require('path');
 const express = require('express');
 const cors    = require('cors');
 const { handleGenerateRequest } = require('./api-handler');
@@ -19,8 +20,12 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 
 app.post('/api/generate', handleGenerateRequest);
-
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Serve built React frontend — production full-stack mode
+const clientDist = path.join(__dirname, '../../app/client/dist');
+app.use(express.static(clientDist));
+app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 
 app.listen(PORT, () => {
   const keysOk = process.env.ANTHROPIC_API_KEY && process.env.PEXELS_API_KEY &&

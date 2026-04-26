@@ -39,8 +39,7 @@ export default function Dashboard() {
 
       simulateProgress();
 
-      const apiBase = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiBase}/api/generate`, {
+      const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photo, ...formData })

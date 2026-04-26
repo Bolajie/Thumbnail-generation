@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: istv-thumbnail-engine-api
+    name: istv-thumbnail-engine
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build
     startCommand: node app/server/index.js
     envVars:
       - key: NODE_ENV
@@ -13,6 +13,4 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: PEXELS_API_KEY
-        sync: false
-      - key: FRONTEND_URL
         sync: false
