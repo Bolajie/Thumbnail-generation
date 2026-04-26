@@ -12,7 +12,8 @@ const processPexelsStage = async (queries) => {
       
       const response = await fetch(pexelsUrl, {
         headers: {
-          'Authorization': process.env.PEXELS_API_KEY
+          'Authorization': process.env.PEXELS_API_KEY,
+          'Referer': 'https://insidesuccess.tv'
         }
       });
 
