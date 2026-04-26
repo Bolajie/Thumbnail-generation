@@ -23,9 +23,22 @@ app.post('/api/generate', handleGenerateRequest);
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Serve built React frontend — production full-stack mode
+const fs = require('fs');
 const clientDist = path.join(__dirname, '../../app/client/dist');
+const indexHtml  = path.join(clientDist, 'index.html');
+
+console.log(`[ISTV] Static dir: ${clientDist}`);
+console.log(`[ISTV] dist exists: ${fs.existsSync(clientDist)}`);
+console.log(`[ISTV] index.html exists: ${fs.existsSync(indexHtml)}`);
+
 app.use(express.static(clientDist));
-app.get('*', (_req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+app.get('*', (_req, res, next) => {
+  if (fs.existsSync(indexHtml)) {
+    res.sendFile(indexHtml);
+  } else {
+    res.status(503).send('<h1>Frontend not built</h1><p>Run: npm run build</p>');
+  }
+});
 
 app.listen(PORT, () => {
   const keysOk = process.env.ANTHROPIC_API_KEY && process.env.PEXELS_API_KEY &&
