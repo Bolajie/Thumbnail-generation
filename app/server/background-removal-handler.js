@@ -1,4 +1,7 @@
 const { removeBackground } = require('@imgly/background-removal-node');
+const fs = require('fs').promises;
+const os = require('os');
+const path = require('path');
 
 /**
  * Stage 1: Background Removal Handler
@@ -15,13 +18,14 @@ async function processBackgroundRemoval({ photo }) {
     // Strip the data:image prefix if it exists
     const base64Data = photo.replace(/^data:image\/\w+;base64,/, '');
     const imageBuffer = Buffer.from(base64Data, 'base64');
-    
-    // @imgly/background-removal-node accepts a variety of inputs.
-    // Uint8Array is standard for Node.js usage.
-    const arrayBuffer = Uint8Array.from(imageBuffer);
+
+    // Write to a temp file — @imgly resolves format from file path reliably
+    const tmpPath = path.join(os.tmpdir(), `istv-guest-${Date.now()}.jpg`);
+    await fs.writeFile(tmpPath, imageBuffer);
 
     // Remove background
-    const resultBlob = await removeBackground(arrayBuffer);
+    const resultBlob = await removeBackground(tmpPath);
+    await fs.unlink(tmpPath).catch(() => {});
     
     // Convert Blob back to a Node Buffer
     const resultArrayBuffer = await resultBlob.arrayBuffer();
