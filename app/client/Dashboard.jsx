@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AssetUpload from './AssetUpload';
 import InputForm from './InputForm';
 import GenerateButton from './GenerateButton';
@@ -7,6 +7,14 @@ import ThumbnailGrid from './ThumbnailGrid';
 export default function Dashboard() {
   const [photo, setPhoto] = useState(null);
   const [transparentPng, setTransparentPng] = useState(null);
+
+  // Keep the Render free-tier server alive — ping every 8 minutes to prevent cold starts
+  useEffect(() => {
+    const ping = () => fetch(window.location.origin + '/api/health').catch(() => {});
+    ping();
+    const id = setInterval(ping, 8 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
   const [formData, setFormData] = useState({
     guestName: '',
     industry: '',
@@ -40,11 +48,23 @@ export default function Dashboard() {
 
       simulateProgress();
 
-      const response = await fetch(window.location.origin + '/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo, transparentPng, ...formData })
-      });
+      // Wake server before the heavy request (guards against cold start mid-request)
+      await fetch(window.location.origin + '/api/health').catch(() => {});
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3 * 60 * 1000); // 3 min timeout
+
+      let response;
+      try {
+        response = await fetch(window.location.origin + '/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo, transparentPng, ...formData }),
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       const data = await response.json();
 
@@ -56,10 +76,13 @@ export default function Dashboard() {
       setLoadingStage(0);
     } catch (err) {
       const msg = err.message || '';
+      const isAbort = err.name === 'AbortError';
       const isNetworkCrash = msg.includes('Load failed') || msg.includes('expected pattern') || msg.includes('NetworkError') || msg.includes('Failed to fetch');
-      setGlobalError(isNetworkCrash
-        ? 'Server is busy or restarting — please wait 30 seconds and try again.'
-        : msg);
+      setGlobalError(isAbort
+        ? 'Generation timed out — the server may be warming up. Please try again.'
+        : isNetworkCrash
+          ? 'Server is busy or restarting — please wait 30 seconds and try again.'
+          : msg);
       setLoadingStage(0);
     }
   };
