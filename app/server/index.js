@@ -5,7 +5,7 @@ require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env'
 const path    = require('path');
 const express = require('express');
 const cors    = require('cors');
-const { handleGenerateRequest } = require('./api-handler');
+const { runPipeline } = require('./api-handler');
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -24,10 +24,31 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 
-app.post('/api/generate', handleGenerateRequest);
+// In-memory job store — good enough for single-instance Render free tier
+const jobs = new Map();
+
+// POST /api/generate — start pipeline, return jobId immediately
+app.post('/api/generate', (req, res) => {
+  const jobId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  jobs.set(jobId, { status: 'pending' });
+
+  runPipeline(req.body)
+    .then(data  => jobs.set(jobId, { status: 'complete', data }))
+    .catch(err  => jobs.set(jobId, { status: 'failed',   error: err.message || 'Pipeline failed' }));
+
+  res.json({ jobId });
+});
+
+// GET /api/jobs/:jobId — client polls this
+app.get('/api/jobs/:jobId', (req, res) => {
+  const job = jobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ status: 'not_found', error: 'Job not found — server may have restarted. Please generate again.' });
+  res.json(job);
+});
+
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 
-// Serve built React frontend — production full-stack mode
+// Serve built React frontend
 const fs = require('fs');
 const clientDist = path.join(__dirname, '../../app/client/dist');
 const indexHtml  = path.join(clientDist, 'index.html');
@@ -37,7 +58,7 @@ console.log(`[ISTV] dist exists: ${fs.existsSync(clientDist)}`);
 console.log(`[ISTV] index.html exists: ${fs.existsSync(indexHtml)}`);
 
 app.use(express.static(clientDist));
-app.get('*', (_req, res, next) => {
+app.get('*', (_req, res) => {
   if (fs.existsSync(indexHtml)) {
     res.sendFile(indexHtml);
   } else {
