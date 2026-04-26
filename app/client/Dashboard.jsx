@@ -6,6 +6,7 @@ import ThumbnailGrid from './ThumbnailGrid';
 
 export default function Dashboard() {
   const [photo, setPhoto] = useState(null);
+  const [transparentPng, setTransparentPng] = useState(null);
   const [formData, setFormData] = useState({
     guestName: '',
     industry: '',
@@ -17,7 +18,7 @@ export default function Dashboard() {
   const [results, setResults] = useState(null);
   const [globalError, setGlobalError] = useState(null);
 
-  const isFormComplete = photo && formData.guestName && formData.industry && formData.show && formData.style && formData.duration;
+  const isFormComplete = photo && transparentPng !== undefined && formData.guestName && formData.industry && formData.show && formData.style && formData.duration;
 
   const handleGenerate = async () => {
     setLoadingStage(1);
@@ -42,7 +43,7 @@ export default function Dashboard() {
       const response = await fetch(window.location.origin + '/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photo, ...formData })
+        body: JSON.stringify({ photo, transparentPng, ...formData })
       });
 
       const data = await response.json();
@@ -54,7 +55,11 @@ export default function Dashboard() {
       setResults(data.variations);
       setLoadingStage(0);
     } catch (err) {
-      setGlobalError(err.message);
+      const msg = err.message || '';
+      const isNetworkCrash = msg.includes('Load failed') || msg.includes('expected pattern') || msg.includes('NetworkError') || msg.includes('Failed to fetch');
+      setGlobalError(isNetworkCrash
+        ? 'Server is busy or restarting — please wait 30 seconds and try again.'
+        : msg);
       setLoadingStage(0);
     }
   };
@@ -88,7 +93,10 @@ export default function Dashboard() {
           ISTV ENGINE <span style={{ color: '#080808', fontWeight: 'bold', fontSize: '11px', background: '#C9A84C', padding: '3px 6px', borderRadius: '4px', verticalAlign: 'middle', marginLeft: '8px' }}>v2.1</span>
         </h1>
         
-        <AssetUpload onUpload={setPhoto} />
+        <AssetUpload onUpload={({ original, transparent }) => {
+          setPhoto(original);
+          setTransparentPng(transparent);
+        }} />
         <InputForm formData={formData} setFormData={setFormData} />
         
         <div style={{ flexGrow: 1 }} />

@@ -9,19 +9,24 @@ const { processSharpTypographyStage } = require('./sharp-typography-handler');
  */
 async function handleGenerate(req, res) {
   try {
-    const { photo, guestName, industry, show, style, duration } = req.body;
+    const { photo, transparentPng: clientTransparentPng, guestName, industry, show, style, duration } = req.body;
 
     if (!photo) {
       return res.status(400).json({ error: true, stage: 'STAGE0', message: 'Missing guest photo.' });
     }
 
-    // STAGE 1
+    // STAGE 1 — skip if the browser already did background removal client-side
     let transparentPng;
-    try {
-      const result = await processBackgroundRemoval({ photo });
-      transparentPng = result.transparentPng;
-    } catch (err) {
-      return res.status(500).json({ error: true, stage: 'STAGE1', message: 'Background removal failed.' });
+    if (clientTransparentPng) {
+      const base64Data = clientTransparentPng.replace(/^data:image\/\w+;base64,/, '');
+      transparentPng = Buffer.from(base64Data, 'base64');
+    } else {
+      try {
+        const result = await processBackgroundRemoval({ photo });
+        transparentPng = result.transparentPng;
+      } catch (err) {
+        return res.status(500).json({ error: true, stage: 'STAGE1', message: 'Background removal failed.' });
+      }
     }
 
     // STAGE 2
