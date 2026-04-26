@@ -37,6 +37,18 @@ Examples by industry:
 
 ---
 
+PEXELS TEXTURE QUERY — SECONDARY BACKGROUND LAYER:
+
+Each variation also needs a pexelsQueryTexture — an abstract, high-contrast image that Gemini will blend INTO the primary background using soft-light at 38–45% opacity. This is what gives backgrounds the rich, multi-layered depth seen in professional broadcast thumbnails.
+
+Rules for a great pexelsQueryTexture:
+- Must be abstract, textural, or atmospheric — NOT a recognisable scene or location
+- Must share the same colour temperature as the primary background (warm primary → warm texture)
+- Should intensify the mood of the variation — not contradict it
+- Examples: "fire embers dark abstract", "gold dust bokeh dark", "marble stone texture dark", "dark smoke swirl dramatic", "amber light bokeh blur", "geometric grid neon dark", "rain drops glass dark", "grunge concrete texture dark"
+
+---
+
 VARIATION DIVERSITY — 5 DISTINCT SCENES:
 Across the 5 variations, use 5 entirely different locations/scenes. Never repeat a setting.
 Spread across: a dramatic outdoor scene, a premium interior, an abstract/stylised environment, a profession-iconic location, and one unexpected creative choice.
@@ -48,6 +60,7 @@ Return a raw JSON array of exactly 5 objects. No preamble. No explanation. No ma
 [
   {
     "pexelsQuery": "specific cinematic industry-linked search string — 4-6 evocative keywords",
+    "pexelsQueryTexture": "abstract textural search string — e.g. 'fire embers dark abstract' or 'gold dust bokeh dark'",
     "templateId": "legacy | ornate | tactical",
     "colourGrade": {
       "tint": "#hex_code",
@@ -60,6 +73,7 @@ Return a raw JSON array of exactly 5 objects. No preamble. No explanation. No ma
       "anchor": "string"
     },
     "overlayAsset": "filename.png",
+    "moodAtmosphere": "orange-sparks.png | anamorphic-flare.png | film-grain.png | none",
     "geminiPrompt": "REQUIRED — 3 to 5 sentences covering: (1) the dominant light source direction and quality in the background scene, e.g. 'Strong directional sunlight enters from upper right, casting long shadows left'; (2) how the guest should be colour-matched and lit to feel part of this scene, e.g. 'Apply warm golden rim light on right shoulder to match the ambient sun; cool blue fill on left side'; (3) the exact mood and atmosphere of this variation, e.g. 'Powerful, commanding, authoritative — this is the most intense variation'; (4) any specific visual integration detail unique to this background, e.g. 'The courthouse columns should appear behind and above the guest, establishing scale and gravitas'.",
     "lightDirection": "single phrase describing light source — e.g. 'upper-left dramatic side lighting' or 'warm backlight from upper right'",
     "textStyle": {
@@ -74,4 +88,10 @@ IMPORTANT NOTES:
 - fontSize should be proportional to name length: short name (≤8 chars) → 155, medium (9-13) → 130, long (14-18) → 105, very long (>18) → 85
 - colour for textStyle is for the typography system — use #FFFFFF (white) for all variations; gold accents are handled by the compositor
 - overlayAsset must be one of: dark-vignette.png, gold-frame.png, floral-gold.png, geometric-lines.png, light-rays.png
+- moodAtmosphere selection guide:
+  - Action, military, high-energy, intense → "orange-sparks.png"
+  - Elegant, cinematic, prestige, golden-hour → "anamorphic-flare.png"
+  - Gritty, raw, investigative, noir → "film-grain.png"
+  - Soft, warm, professional, clean → "none"
 - geminiPrompt MUST be 3-5 complete sentences — a single phrase is not acceptable
+- pexelsQueryTexture MUST be abstract and textural — never a scene or location

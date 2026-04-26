@@ -40,11 +40,15 @@ async function runPipeline({ photo, transparentPng: clientTransparentPng, guestN
     throw Object.assign(new Error('Translation layer failed to build variations.'), { stage: 'STAGE2' });
   }
 
-  // STAGE 3
-  console.log(`${t()} Stage 3: fetching backgrounds`);
-  let pexelsResults;
+  // STAGE 3 — fetch primary backgrounds + texture backgrounds in one parallel batch (10 total)
+  console.log(`${t()} Stage 3: fetching backgrounds (primary + texture)`);
+  let pexelsResults, textureResults;
   try {
-    pexelsResults = await processPexelsStage(instructions.map(i => i.pexelsQuery));
+    const primaryQueries = instructions.map(i => i.pexelsQuery);
+    const textureQueries = instructions.map(i => i.pexelsQueryTexture || 'dark abstract bokeh blur');
+    const allResults     = await processPexelsStage([...primaryQueries, ...textureQueries]);
+    pexelsResults  = allResults.slice(0, 5);
+    textureResults = allResults.slice(5, 10);
     console.log(`${t()} Stage 3: done — ${pexelsResults.map(r => r.buffer.length + 'b').join(', ')}`);
   } catch (err) {
     console.error(`${t()} Stage 3 FAILED:`, err.message);
@@ -57,6 +61,7 @@ async function runPipeline({ photo, transparentPng: clientTransparentPng, guestN
   try {
     geminiResults = await processGeminiCompositorStage({
       variations: instructions, backgrounds: pexelsResults,
+      textureBackgrounds: textureResults,
       transparentGuestPng: transparentPng, show, style
     });
     console.log(`${t()} Stage 4a: done — ${geminiResults.filter(r => r.success).length}/5 succeeded`);
