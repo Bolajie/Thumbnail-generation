@@ -48,8 +48,17 @@ export default function Dashboard() {
 
       simulateProgress();
 
-      // Wake server before the heavy request (guards against cold start mid-request)
-      await fetch(window.location.origin + '/api/health').catch(() => {});
+      // Wait for the server to be fully awake — retry health check up to 12x (60 seconds)
+      // This handles cold starts on Render free tier before sending the heavy request
+      let serverReady = false;
+      for (let i = 0; i < 12; i++) {
+        try {
+          const h = await fetch(window.location.origin + '/api/health');
+          if (h.ok) { serverReady = true; break; }
+        } catch (_) {}
+        await new Promise(r => setTimeout(r, 5000));
+      }
+      if (!serverReady) throw new Error('Server did not respond — please try again in 30 seconds.');
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3 * 60 * 1000); // 3 min timeout
