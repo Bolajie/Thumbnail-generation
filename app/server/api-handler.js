@@ -106,7 +106,7 @@ async function handleGenerate(req, res) {
 
       return {
         error: false,
-        url: `data:image/png;base64,${resItem.buffer.toString('base64')}`,
+        url: `data:image/jpeg;base64,${resItem.buffer.toString('base64')}`,
         templateId: instruction.templateId,
         style,
         photographerCredit: pexels.photographer

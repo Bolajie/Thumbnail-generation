@@ -43,10 +43,10 @@ async function processSharpTypographyStage({ geminiResults, instructions, guestN
 
         const finalBuffer = await sharp(baseBuffer)
           .composite([{ input: Buffer.from(svgText), blend: 'over' }])
-          .png()
+          .jpeg({ quality: 88 })
           .toBuffer();
 
-        return { success: true, buffer: finalBuffer };
+        return { success: true, buffer: finalBuffer, format: 'jpeg' };
       } catch (err) {
         const stageError = new Error(`STAGE4B_ERROR: Typography layer assembly failed for variation ${index}.`);
         stageError.stage = 'STAGE4B_ERROR';
