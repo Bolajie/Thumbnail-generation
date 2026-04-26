@@ -68,7 +68,7 @@ const processPexelsStage = async (queries) => {
 
     } catch (error) {
       // Pexels failed — use a generated gradient background so the pipeline continues
-      console.warn(`[Stage 3] Pexels fetch failed for "${query}": ${error.message}. Using gradient fallback.`);
+      console.warn(`[Stage 3] Pexels unavailable for query ${index + 1} — using gradient fallback.`);
       return generateFallbackBackground(index);
     }
   };
