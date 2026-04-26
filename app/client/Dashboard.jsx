@@ -39,7 +39,7 @@ export default function Dashboard() {
 
       simulateProgress();
 
-      const response = await fetch('/api/generate', {
+      const response = await fetch(window.location.origin + '/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photo, ...formData })
