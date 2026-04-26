@@ -23,8 +23,11 @@ async function processBackgroundRemoval({ photo }) {
     const tmpPath = path.join(os.tmpdir(), `istv-guest-${Date.now()}.jpg`);
     await fs.writeFile(tmpPath, imageBuffer);
 
-    // Remove background
-    const resultBlob = await removeBackground(tmpPath);
+    // Remove background — isnet_quint8 uses ~75% less RAM than the default isnet model
+    const resultBlob = await removeBackground(tmpPath, {
+      model: 'isnet_quint8',
+      output: { format: 'image/png' }
+    });
     await fs.unlink(tmpPath).catch(() => {});
     
     // Convert Blob back to a Node Buffer
