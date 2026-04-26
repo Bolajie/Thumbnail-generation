@@ -41,6 +41,16 @@ async function processGeminiCompositorStage({ variations, backgrounds, transpare
         const templatePath = path.join(__dirname, `../../brand/templates/${instruction.templateId}.json`);
         const templateLayout = JSON.parse(await fs.readFile(templatePath, 'utf-8'));
 
+        // Per-overlay blend mode — frame/vignette overlays need multiply, light overlays need screen
+        const BLEND_MODES = {
+          'gold-frame.png':      'multiply',
+          'floral-gold.png':     'overlay',
+          'dark-vignette.png':   'multiply',
+          'light-rays.png':      'screen',
+          'geometric-lines.png': 'screen',
+        };
+        const overlayBlend = BLEND_MODES[overlayFileName] || 'screen';
+
         const finalPrompt = promptTemplate
           .replace('{{BRAND_IDENTITY}}', brandIdentity)
           .replace('{{SHOW_NAME}}', showPreset.showName)
@@ -51,9 +61,10 @@ async function processGeminiCompositorStage({ variations, backgrounds, transpare
           .replace('{{GUEST_POSITION}}', JSON.stringify(instruction.guestPosition || templateLayout.guestPosition))
           .replace('{{GUEST_SCALE}}', instruction.guestPosition?.scale || templateLayout.guestPosition?.scale || '1.0')
           .replace('{{OVERLAY_OPACITY}}', '1.0')
-          .replace('{{OVERLAY_BLEND}}', 'screen')
+          .replace('{{OVERLAY_BLEND}}', overlayBlend)
           .replace('{{GOLD_COLOUR}}', showPreset.primaryColour)
-          .replace('{{LIGHT_DIRECTION}}', instruction.geminiPrompt || 'cinematic studio lighting');
+          .replace('{{LIGHT_DIRECTION}}', instruction.lightDirection || 'dramatic side lighting, key light from upper left')
+          .replace('{{VARIATION_DESCRIPTION}}', instruction.geminiPrompt || '');
 
         // Stage 4a — Nano Banana Pro (Gemini multimodal compositor)
         const result = await geminiModel.generateContent([

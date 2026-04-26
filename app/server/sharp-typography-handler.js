@@ -1,48 +1,96 @@
 const sharp = require('sharp');
 
-/**
- * Stage 4b: Sharp Typography Layer
- * Adds SVG typography on top of the base image.
- */
+function escapeXml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 async function processSharpTypographyStage({ geminiResults, instructions, guestName, duration }) {
   const results = await Promise.allSettled(
     geminiResults.map(async (geminiResult, index) => {
       if (!geminiResult.success) {
-        // Pass through previous Stage 4a error
         throw geminiResult.error;
       }
-      
+
       try {
         const baseBuffer = geminiResult.buffer;
-        const { textStyle } = instructions[index];
-        const fontSize = textStyle?.fontSize || 80;
-        const color = textStyle?.colour || '#C9A84C'; // Primary Gold
-        
-        const width = 1280;
-        const height = 720;
-        
-        // Use SVG for typography to leverage font-family rules natively
-        const svgText = `
-          <svg width="${width}" height="${height}">
-            <style>
-              .name { font-family: 'Montserrat'; font-weight: bold; font-size: ${fontSize}px; fill: ${color}; }
-              .episode { font-family: 'Montserrat'; font-weight: bold; font-size: ${Math.max(24, fontSize * 0.4)}px; fill: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; }
-              .duration { font-family: 'Montserrat'; font-weight: 600; font-size: 24px; fill: #FFFFFF; }
-              .duration-bg { fill: #000000; fill-opacity: 0.7; rx: 4px; }
-            </style>
-            
-            <!-- Guest Name & Episode Label -->
-            <text x="100" y="580" class="episode">EPISODE</text>
-            <text x="100" y="${580 + fontSize}" class="name">${guestName || ''}</text>
-            
-            <!-- Duration Badge -->
-            <rect x="1130" y="650" width="120" height="40" class="duration-bg" />
-            <text x="1190" y="677" class="duration" text-anchor="middle">${duration || ''}</text>
-          </svg>
-        `;
+
+        // Split name into 2 lines, uppercase, adaptive font size
+        const nameParts = (guestName || '').trim().toUpperCase().split(/\s+/).filter(Boolean);
+        const splitAt = Math.ceil(nameParts.length / 2);
+        const nameLine1 = escapeXml(nameParts.slice(0, splitAt).join(' '));
+        const nameLine2 = escapeXml(nameParts.slice(splitAt).join(' '));
+        const isTwoLine = nameLine2.length > 0;
+        const longestLine = Math.max(nameLine1.length, isTwoLine ? nameLine2.length : 0);
+
+        // Target ~1050px wide for the longest line (Liberation Sans Bold ≈ 0.60em/char)
+        let nameFontSize = Math.floor(1050 / (longestLine * 0.60));
+        nameFontSize = Math.min(158, Math.max(72, nameFontSize));
+
+        const lineHeight   = Math.round(nameFontSize * 1.08);
+        const line2Y       = isTwoLine ? 638 : 626;
+        const line1Y       = isTwoLine ? line2Y - lineHeight : line2Y;
+        const episodeY     = Math.min((isTwoLine ? line2Y : line1Y) + 52, 700);
+        const safeDuration = escapeXml(duration);
+
+        // Cinematic vignette — dark edges, clear centre
+        const vignetteSvg = `<svg width="1280" height="720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="vig" cx="50%" cy="50%" r="72%">
+      <stop offset="35%" stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.62"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#vig)"/>
+</svg>`;
+
+        // Dark bottom gradient so white text always pops regardless of background
+        const textBackingSvg = `<svg width="1280" height="720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.82"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="370" width="1280" height="350" fill="url(#tbg)"/>
+</svg>`;
+
+        // Typography — large white centered name, EPISODE below, duration badge
+        const typographySvg = `<svg width="1280" height="720" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .nm  { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-weight: 900; font-size: ${nameFontSize}px; fill: #FFFFFF; }
+    .nms { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-weight: 900; font-size: ${nameFontSize}px; fill: #000000; opacity: 0.45; }
+    .ep  { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-weight: 700; font-size: 19px; fill: rgba(255,255,255,0.75); letter-spacing: 8px; }
+    .dur { font-family: "Liberation Sans", Arial, Helvetica, sans-serif; font-weight: 700; font-size: 21px; fill: #FFFFFF; }
+  </style>
+
+  <!-- Name drop shadow (+3,+4 offset) -->
+  <text x="643" y="${line1Y + 4}" class="nms" text-anchor="middle">${nameLine1}</text>
+  ${isTwoLine ? `<text x="643" y="${line2Y + 4}" class="nms" text-anchor="middle">${nameLine2}</text>` : ''}
+
+  <!-- Guest name (white, centered, large) -->
+  <text x="640" y="${line1Y}" class="nm" text-anchor="middle">${nameLine1}</text>
+  ${isTwoLine ? `<text x="640" y="${line2Y}" class="nm" text-anchor="middle">${nameLine2}</text>` : ''}
+
+  <!-- EPISODE label below name -->
+  <text x="640" y="${episodeY}" class="ep" text-anchor="middle">E P I S O D E</text>
+
+  <!-- Duration badge — bottom right -->
+  <rect x="1132" y="648" width="118" height="34" fill="black" fill-opacity="0.72" rx="4"/>
+  <text x="1191" y="671" class="dur" text-anchor="middle">${safeDuration}</text>
+</svg>`;
 
         const finalBuffer = await sharp(baseBuffer)
-          .composite([{ input: Buffer.from(svgText), blend: 'over' }])
+          .modulate({ saturation: 1.2 })
+          .linear(1.05, -5)
+          .composite([
+            { input: Buffer.from(vignetteSvg),    blend: 'over' },
+            { input: Buffer.from(textBackingSvg), blend: 'over' },
+            { input: Buffer.from(typographySvg),  blend: 'over' },
+          ])
           .jpeg({ quality: 88 })
           .toBuffer();
 
