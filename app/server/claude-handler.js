@@ -80,7 +80,7 @@ async function processClaudeStage({ guestName, industry, show, style, duration }
       'overlayAsset',
       'moodAtmosphere',
       'geminiPrompt',
-      'textStyle'
+      'lightDirection',
     ];
 
     const validTemplates   = ['legacy', 'ornate', 'tactical'];

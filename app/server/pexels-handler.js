@@ -31,8 +31,8 @@ async function generateFallbackBackground(index) {
 }
 
 const processPexelsStage = async (queries) => {
-  if (!Array.isArray(queries) || queries.length !== 5) {
-    throw new Error('STAGE3_ERROR: Expected an array of exactly 5 Pexels queries.');
+  if (!Array.isArray(queries) || queries.length === 0) {
+    throw new Error('STAGE3_ERROR: Expected a non-empty array of Pexels queries.');
   }
 
   const fetchPexelsImage = async (query, index, isFallback = false) => {
