@@ -1,0 +1,12 @@
+{
+  "showName": "Kingdom by Creator",
+  "primaryColour": "#C9A84C",
+  "accentColour": "#87CEEB",
+  "recommendedTemplate": "ornate",
+  "defaultOverlays": [
+    "light-rays.png",
+    "floral-gold.png"
+  ],
+  "badgePath": "/brand/assets/badges/kingdom-by-creator-badge.png",
+  "pexelsKeywordModifier": "mountain sunrise vast landscape god rays divine light"
+}

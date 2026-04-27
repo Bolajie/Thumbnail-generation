@@ -1,0 +1,12 @@
+{
+  "showName": "Builders of America",
+  "primaryColour": "#FF6B35",
+  "accentColour": "#4A7B9D",
+  "recommendedTemplate": "tactical",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/builders-of-america-badge.png",
+  "pexelsKeywordModifier": "construction site steel beams bridge architecture cranes sunset"
+}

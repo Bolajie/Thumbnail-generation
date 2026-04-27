@@ -1,0 +1,12 @@
+{
+  "showName": "Couple's Empire",
+  "primaryColour": "#C9A97A",
+  "accentColour": "#722F37",
+  "recommendedTemplate": "ornate",
+  "defaultOverlays": [
+    "gold-frame.png",
+    "floral-gold.png"
+  ],
+  "badgePath": "/brand/assets/badges/couples-empire-badge.png",
+  "pexelsKeywordModifier": "luxury mansion interior private jet champagne lounge elegant"
+}
