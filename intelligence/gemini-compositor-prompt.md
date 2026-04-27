@@ -27,6 +27,7 @@ COMPOSITING PARAMETERS:
 - Overlay Blend Mode: {{OVERLAY_BLEND}} at {{OVERLAY_OPACITY}} opacity
 - Brand Gold: {{GOLD_COLOUR}}
 - Key Light Direction: {{LIGHT_DIRECTION}}
+- Background Dominant Highlight Colour: {{BACKGROUND_DOMINANT_COLOR}}
 
 ---
 
@@ -52,12 +53,14 @@ COMPOSITING REQUIREMENTS — EXECUTE EACH STEP IN ORDER:
 2. GUEST INTEGRATION — THIS IS THE CRITICAL STEP
    - Place the transparent guest PNG at the position and scale specified in GUEST POSITION
    - Match the guest's ambient exposure to the background within ±0.5 stops — guest must not look over-exposed or under-exposed relative to the scene
-   - Paint a 2–3 pixel wide rim-light glow along the guest's silhouette edge on the side facing the key light direction ({{LIGHT_DIRECTION}}). Rim-light colour must match the scene's key light colour temperature: warm/golden for golden-hour scenes, cool/blue for night scenes, white for studio scenes. Rim-light intensity: 60–80% — bright enough to be clearly visible but not blown out. This is non-negotiable — it is what separates 'composited' from 'placed'.
+   - Paint a 2–3 pixel wide rim-light glow along the guest's silhouette edge on the side facing the key light direction ({{LIGHT_DIRECTION}}). Use {{BACKGROUND_DOMINANT_COLOR}} as the precise rim-light colour — this is the actual highlight colour extracted from the background scene. Rim-light intensity: 60–80% — bright enough to be clearly visible but not blown out. This is non-negotiable — it is what separates 'composited' from 'placed'.
+   - LIGHT WRAP: Apply a soft bloom of {{BACKGROUND_DOMINANT_COLOR}} onto the guest's edges at 22–30% opacity using screen blend mode. Light wrap width: 8–12px with high gaussian blur softness. This makes the background light physically appear to wrap around the guest, eliminating the "cutout on background" look. This is a second pass on top of the rim light, applied to all edges that face the scene — not just the key light side.
    - Apply cool fill light on the opposite side from the key light
    - Cast a soft, realistic ground shadow beneath the guest — shadows anchor subjects and eliminate the "floating" look
    - Feather the guest edges 2–4px to eliminate harsh cutout lines — the cutout boundary must be invisible
    - Colour-match the guest's skin tones and clothing to the scene's ambient colour temperature
    - The guest must look like they were photographed in this location, not composited into it
+   - FOREGROUND DEPTH LAYER: As the final compositing pass, add 3–5 large soft bokeh circles in the foreground plane (extremely blurred, radius 50–90px, opacity 12–20%). Position them to partially overlap the guest's upper shoulders and chest. Use {{BACKGROUND_DOMINANT_COLOR}} for the bokeh fill colour. This creates a physical sense of depth — the viewer reads: background → subject → foreground atmosphere. Without this, the subject reads as a flat 2D element on the scene. The bokeh must be in front of (overlapping) the guest, not behind.
 
 3. COLOUR GRADE
    - Apply cinematic contrast: lift shadows slightly, add micro-contrast in mid-tones, preserve highlight detail

@@ -30,7 +30,14 @@ async function processGeminiCompositorStage({ variations, backgrounds, textureBa
     const processVariation = async (instruction, index) => {
       try {
         const backgroundBuffer = backgrounds[index].buffer;
-        
+
+        // Extract dominant highlight colour from primary background for color-matched rim light + light wrap
+        const bgStats = await sharp(backgroundBuffer).resize(160, 90, { fit: 'cover' }).stats();
+        const rH = Math.round(Math.min(255, bgStats.channels[0].mean * 1.45));
+        const gH = Math.round(Math.min(255, bgStats.channels[1].mean * 1.45));
+        const bH = Math.round(Math.min(255, bgStats.channels[2].mean * 1.45));
+        const bgDominantColor = `#${[rH, gH, bH].map(v => v.toString(16).padStart(2, '0')).join('')}`;
+
         const overlayFileName = instruction.overlayAsset || (instruction.overlayList && instruction.overlayList[0]);
         if (!overlayFileName) {
           throw new Error('Instruction is missing overlay asset definition.');
@@ -64,6 +71,7 @@ async function processGeminiCompositorStage({ variations, backgrounds, textureBa
           .replace('{{OVERLAY_BLEND}}', overlayBlend)
           .replace('{{GOLD_COLOUR}}', showPreset.primaryColour)
           .replace('{{LIGHT_DIRECTION}}', instruction.lightDirection || 'dramatic side lighting, key light from upper left')
+          .replace('{{BACKGROUND_DOMINANT_COLOR}}', bgDominantColor)
           .replace('{{VARIATION_DESCRIPTION}}', instruction.geminiPrompt || '');
 
         // Stage 4a — Nano Banana Pro (Gemini multimodal compositor)
