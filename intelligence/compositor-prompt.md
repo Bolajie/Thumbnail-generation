@@ -75,18 +75,12 @@ Return a raw JSON array of exactly 5 objects. No preamble. No explanation. No ma
     "overlayAsset": "filename.png",
     "moodAtmosphere": "orange-sparks.png | anamorphic-flare.png | film-grain.png | none",
     "geminiPrompt": "REQUIRED — 3 to 5 sentences covering: (1) the dominant light source direction and quality in the background scene, e.g. 'Strong directional sunlight enters from upper right, casting long shadows left'; (2) how the guest should be colour-matched and lit to feel part of this scene, e.g. 'Apply warm golden rim light on right shoulder to match the ambient sun; cool blue fill on left side'; (3) the exact mood and atmosphere of this variation, e.g. 'Powerful, commanding, authoritative — this is the most intense variation'; (4) any specific visual integration detail unique to this background, e.g. 'The courthouse columns should appear behind and above the guest, establishing scale and gravitas'.",
-    "lightDirection": "single phrase describing light source — e.g. 'upper-left dramatic side lighting' or 'warm backlight from upper right'",
-    "textStyle": {
-      "fontSize": 0,
-      "weight": "string",
-      "colour": "#hex_code"
-    }
+    "lightDirection": "single phrase describing light source — e.g. 'upper-left dramatic side lighting' or 'warm backlight from upper right'"
   }
 ]
 
 IMPORTANT NOTES:
-- fontSize should be proportional to name length: short name (≤8 chars) → 155, medium (9-13) → 130, long (14-18) → 105, very long (>18) → 85
-- colour for textStyle is for the typography system — use #FFFFFF (white) for all variations; gold accents are handled by the compositor
+- Typography (name, EPISODE label, duration badge) is handled entirely by the Sharp compositor — do NOT include font size, colour, or weight in your output; Sharp hardcodes broadcast-standard typography automatically
 - overlayAsset must be one of: dark-vignette.png, gold-frame.png, floral-gold.png, geometric-lines.png, light-rays.png
 - moodAtmosphere selection guide:
   - Action, military, high-energy, intense → "orange-sparks.png"
