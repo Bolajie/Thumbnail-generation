@@ -1,8 +1,7 @@
-# CLAUDE.md — ISTV Thumbnail Engine v2
-# CLAUDE.md — ISTV Thumbnail Engine v2
+# CLAUDE.md — ISTV Thumbnail Engine v3
 **Project:** Inside Success TV — Internal Thumbnail Generation Tool
 **Operator:** ISTV production editors
-**Version:** 2.1 — Hybrid Compositing Architecture
+**Version:** 3.0 — Hybrid Compositing Architecture with Z-Layer Depth
 **Last updated:** April 2026
 
 ---
@@ -37,9 +36,12 @@ The pipeline uses a hybrid compositing approach:
 ├── /brand                                 ← All visual identity
 │   ├── CONTEXT.md                         ← Read before touching anything in /brand
 │   ├── istv-master.json                   ← Master palette + font constants
-│   ├── /shows                             ← Per-show preset configs (6 files)
+│   ├── /shows                             ← Per-show preset configs (14 files)
 │   ├── /templates                         ← Compositor layout definitions (3 files)
-│   └── /assets                            ← Overlay PNGs + show badge PNGs
+│   └── /assets
+│       ├── /overlays                      ← Overlay PNGs (gold-frame, vignette, etc.)
+│       ├── /badges                        ← Per-show badge PNGs
+│       └── /atmospherics                  ← Particle/grain assets for Sharp Stage 4b
 │
 ├── /app                                   ← All software
 │   ├── /server                            ← Node.js + Express backend
@@ -50,12 +52,20 @@ The pipeline uses a hybrid compositing approach:
 ├── /intelligence                          ← All AI prompt files + implementation skills
 │   ├── CONTEXT.md                         ← Read before touching prompts or skills
 │   ├── brand-identity-prompt.md           ← ISTV visual DNA — always injected into Gemini
-│   ├── compositor-prompt.md               ← Master Claude prompt (created at Prompt 3)
-│   ├── gemini-compositor-prompt.md        ← Master Gemini prompt (created at Prompt 3)
-│   ├── cinematic-gold.md                  ← Style recipe (created at Prompt 3)
-│   ├── modern-corporate.md                ← Style recipe (created at Prompt 3)
-│   ├── gritty-action.md                   ← Style recipe (created at Prompt 3)
-│   ├── vibrant-tech.md                    ← Style recipe (created at Prompt 3)
+│   ├── compositor-prompt.md               ← Master Claude Stage 2 prompt
+│   ├── gemini-compositor-prompt.md        ← Master Gemini Stage 4a prompt
+│   ├── legacy-makers.md                   ← Show-specific style recipe
+│   ├── women-in-power.md                  ← Show-specific style recipe
+│   ├── operation-ceo.md                   ← Show-specific style recipe
+│   ├── americas-top-lawyers.md            ← Show-specific style recipe
+│   ├── americas-best-doctors.md           ← Show-specific style recipe
+│   ├── kingdom-by-creator.md              ← Show-specific style recipe
+│   ├── mompreneurs.md                     ← Show-specific style recipe
+│   ├── americas-top-trainers.md           ← Show-specific style recipe
+│   ├── builders-of-america.md             ← Show-specific style recipe
+│   ├── americas-top-coaches.md            ← Show-specific style recipe
+│   ├── couples-empire.md                  ← Show-specific style recipe
+│   ├── americas-top-agents.md             ← Show-specific style recipe
 │   └── /skills                            ← Skill files governing implementation
 │       ├── /frontend-design
 │       ├── /react-skill
@@ -98,7 +108,7 @@ The pipeline uses a hybrid compositing approach:
 |---|---|---|
 | Show preset | `[show-slug].json` | `women-in-power.json` |
 | Template layout | `[layout-id].json` | `ornate.json` |
-| Style recipe | `[style-slug].md` | `cinematic-gold.md` |
+| Style recipe | `[show-slug].md` | `legacy-makers.md` |
 | Thumbnail output | `[guest-slug]-[YYYYMMDD]-[variant].png` | `jane-smith-20260419-v3.png` |
 
 ---
@@ -130,23 +140,25 @@ Stage 1 — Background Removal
   Output: transparent guest PNG
           ↓
 Stage 2 — Claude Translation Layer
-  Model:  claude-sonnet-4-20250514
-  Input:  form data + show preset + style recipe + brand identity
+  Model:  claude-sonnet-4-20250514 (with prompt caching)
+  System: brand identity + show preset  ← cached for 5 min (same show = cache hit)
+  User:   compositor-prompt.md + style recipe + form data
   Output: 5 compositor instruction objects
-  Each:   { pexelsQuery, templateId, colourGrade,
-             guestPosition, overlayAsset, geminiPrompt, textStyle }
+  Each:   { pexelsQuery, pexelsQueryTexture, templateId, colourGrade,
+             guestPosition, overlayAsset, moodAtmosphere, geminiPrompt, lightDirection }
           ↓
-Stage 3 — Pexels Asset Fetch (×5 parallel)
-  Input:  5 pexelsQuery strings
-  Output: 5 background image buffers
+Stage 3 — Pexels Asset Fetch (×10 parallel — "double-bagging")
+  Input:  10 query strings (5 primary scene + 5 abstract texture, one pair per variation)
+  Output: 10 image buffers split into primaryBackgrounds[5] + textureBackgrounds[5]
           ↓
 Stage 4a — Gemini Compositor / Nano Banana Pro (×5 parallel)
   Input per variation:
-    Image 1 — Pexels background (Stage 3)
-    Image 2 — Transparent guest PNG (Stage 1)
-    Image 3 — Overlay asset PNG (/brand/assets/overlays/)
+    Image 1 — Primary Pexels background scene
+    Image 2 — Texture Pexels abstract layer (blended into BG via SOFT LIGHT at 38–45%)
+    Image 3 — Transparent guest PNG (Stage 1)
+    Image 4 — Overlay asset PNG (/brand/assets/overlays/)
   Prompt per variation:
-    gemini-compositor-prompt.md
+    gemini-compositor-prompt.md (with extracted {{BACKGROUND_DOMINANT_COLOR}})
     + brand-identity-prompt.md
     + show preset (/brand/shows/[show].json)
     + template layout (/brand/templates/[id].json)
@@ -156,11 +168,15 @@ Stage 4a — Gemini Compositor / Nano Banana Pro (×5 parallel)
           ↓
 Stage 4b — Sharp Typography Layer (×5 parallel)
   Input:  Gemini base image (Stage 4a)
-  Adds:
-    SVG guest name — large, bold, Montserrat, gold
-    SVG EPISODE label — small caps, above name
-    SVG duration badge — bottom-right, white
-  Output: final PNG buffer (1280×720)
+  Adds (in order):
+    Cinematic vignette (radial gradient SVG)
+    Atmospheric particle overlay — orange-sparks, anamorphic-flare, or film-grain
+      (from /brand/assets/atmospherics/, blended screen mode)
+    Dark bottom gradient (so white text always reads)
+    SVG guest name — 2-line adaptive, white with 1.5px gold stroke, drop shadow
+    SVG EPISODE label — wide-tracked, semi-transparent
+    SVG duration badge — bottom-right
+  Output: final JPEG buffer (1280×720)
           ↓
 5 variations → editor selects → downloads at 1280×720
 ```
@@ -173,7 +189,9 @@ Every resource built in this project is channelled into Gemini per variation:
 
 | Resource | Source | What Gemini uses it for |
 |---|---|---|
-| Background image | Pexels (Stage 3) | Scene foundation and environment |
+| Primary background image | Pexels (Stage 3) | Scene foundation and environment |
+| Texture background image | Pexels (Stage 3) | Depth layer — SOFT LIGHT blended into primary |
+| Background dominant color | Extracted via Sharp `.stats()` | Exact hex for rim light + light wrap |
 | Transparent guest PNG | @imgly (Stage 1) | Subject placement and integration |
 | Overlay asset PNG | `/brand/assets/overlays/` | Mood, texture, decorative layer |
 | Brand identity prompt | `/intelligence/brand-identity-prompt.md` | ISTV visual DNA and rules |
@@ -192,4 +210,4 @@ Every resource built in this project is channelled into Gemini per variation:
 | `react-skill` | `/intelligence/skills/react-skill/AGENTS.md` | ✅ Complete |
 | `pexels-api` | `/intelligence/skills/pexels-api/SKILL.md` | ✅ Complete |
 | `sharp-compositor` | `/intelligence/skills/sharp-compositor/SKILL.md` | ✅ Complete |
-| `nano-banana-pro` | `/intelligence/skills/nano-banana-pro/SKILL.md` | 🔲 To create |
+| `nano-banana-pro` | `/intelligence/skills/nano-banana-pro/SKILL.md` | ✅ Complete |

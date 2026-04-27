@@ -70,8 +70,8 @@ All fields required. No submit without all fields filled.
 |---|---|---|
 | Guest Name | Text input | Free text |
 | Industry | Dropdown | Finance, Real Estate, Fitness, Corporate, Entertainment, Wellness, Legal, Tech, Other |
-| Show | Dropdown | Legacy Makers, Women in Power, Operation CEO, Office Lockdown, America's Top Lawyer, General/Awards |
-| Prompt Style | Dropdown | Cinematic Gold, Modern Corporate, Gritty Action, Vibrant Tech |
+| Show | Dropdown | Legacy Makers, Women in Power, Operation CEO, America's Top Lawyers, America's Best Doctors, Kingdom by Creator, Mompreneurs, America's Top Trainers, Builders of America, America's Top Coaches, Couple's Empire, America's Top Agents |
+| Style | Dropdown | Same 12 options as Show — select the matching show style or cross-show for creative mixing |
 | Episode Duration | Text input | e.g. 22:53 |
 
 ### GenerateButton.jsx

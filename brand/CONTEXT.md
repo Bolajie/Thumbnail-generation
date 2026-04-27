@@ -16,7 +16,7 @@ visual rules. All visual decisions live here.
 ## Process
 
 1. Start with `istv-master.json` — it defines the base palette and font that
-   every show inherits. Never change it without reviewing all 6 show presets.
+   every show inherits. Never change it without reviewing all 14 show presets.
 2. Read the relevant show `.json` in `/shows` before editing any show config.
 3. Read the relevant template `.json` in `/templates` before editing any layout.
 4. Check `/assets` before creating new overlays — the asset may already exist.
@@ -38,9 +38,15 @@ default overlay list, badge path, and Pexels keyword modifier.
 | `legacy-makers.json` | Legacy Makers |
 | `women-in-power.json` | Women in Power |
 | `operation-ceo.json` | Operation CEO |
-| `office-lockdown.json` | Office Lockdown |
-| `americas-top-lawyer.json` | America's Top Lawyer |
-| `general-awards.json` | General / Awards |
+| `americas-top-lawyers.json` | America's Top Lawyers |
+| `americas-best-doctors.json` | America's Best Doctors |
+| `kingdom-by-creator.json` | Kingdom by Creator |
+| `mompreneurs.json` | Mompreneurs |
+| `americas-top-trainers.json` | America's Top Trainers |
+| `builders-of-america.json` | Builders of America |
+| `americas-top-coaches.json` | America's Top Coaches |
+| `couples-empire.json` | Couple's Empire |
+| `americas-top-agents.json` | America's Top Agents |
 
 ### /templates — Compositor layout definitions
 Each file defines guest position, text position, overlay list, colour grade
@@ -53,28 +59,41 @@ config, and badge position. The Sharp compositor reads these directly.
 | `tactical.json` | `tactical` | Guest right-aligned, text left-aligned |
 
 ### /assets — Static PNG library
-All overlay and badge assets. Sharp composites these directly onto thumbnails.
+All overlay, badge, and atmospheric assets. Sharp composites these directly.
 Assets are referenced by filename — names must not change once in use.
 
 **Overlays** (`/assets/overlays/`)
-| File | Effect |
-|---|---|
-| `gold-frame.png` | Decorative gold border frame |
-| `dark-vignette.png` | Edge darkening for depth |
-| `floral-gold.png` | Ornate gold floral decoration |
-| `geometric-lines.png` | Clean geometric line pattern |
-| `light-rays.png` | Dramatic light ray effect |
+| File | Effect | Blend mode |
+|---|---|---|
+| `gold-frame.png` | Decorative gold border frame | multiply |
+| `dark-vignette.png` | Edge darkening for depth | multiply |
+| `floral-gold.png` | Ornate gold floral decoration | overlay |
+| `geometric-lines.png` | Clean geometric line pattern | screen |
+| `light-rays.png` | Dramatic light ray effect | screen |
+
+**Atmospherics** (`/assets/atmospherics/`) — applied by Sharp Stage 4b, screen blend
+| File | Effect | Notes |
+|---|---|---|
+| `orange-sparks.png` | Scattered amber/orange spark particles | Action, military, intense shows |
+| `anamorphic-flare.png` | Horizontal streak + gold radial hotspot | Elegant, cinematic, golden-hour |
+| `film-grain.png` | 320×180 RGBA noise tile | Gritty, noir — tiled across full canvas |
 
 **Badges** (`/assets/badges/`)
-One per show. Composited into Layer 6 (show label area).
+One per show. Composited into the show label area.
 | File | Show |
 |---|---|
 | `legacy-makers-badge.png` | Legacy Makers |
 | `women-in-power-badge.png` | Women in Power |
 | `operation-ceo-badge.png` | Operation CEO |
-| `office-lockdown-badge.png` | Office Lockdown |
-| `americas-top-lawyer-badge.png` | America's Top Lawyer |
-| `general-awards-badge.png` | General / Awards |
+| `americas-top-lawyers-badge.png` | America's Top Lawyers |
+| `americas-best-doctors-badge.png` | America's Best Doctors |
+| `kingdom-by-creator-badge.png` | Kingdom by Creator |
+| `mompreneurs-badge.png` | Mompreneurs |
+| `americas-top-trainers-badge.png` | America's Top Trainers |
+| `builders-of-america-badge.png` | Builders of America |
+| `americas-top-coaches-badge.png` | America's Top Coaches |
+| `couples-empire-badge.png` | Couple's Empire |
+| `americas-top-agents-badge.png` | America's Top Agents |
 
 ---
 
@@ -126,9 +145,9 @@ Claude uses this as a starting point in Stage 2. It refines based on guest photo
 2. Update: `showName`, `primaryColour`, `accentColour`, `recommendedTemplate`,
    `defaultOverlays`, `badgePath`, `pexelsKeywordModifier`
 3. Create the badge PNG and save to `/assets/badges/[show-slug]-badge.png`
-4. Update the badge reference in the new show `.json`
-5. Add the show to the dropdown options in `/app/client/InputForm.jsx`
-6. Update the show routing in `/app/server/claude-handler.js`
+4. Create `[show-slug].md` style recipe in `/intelligence/` — see existing recipes for format
+5. Add the show to both the Show and Style dropdowns in `/app/client/InputForm.jsx`
+   (both copies: `InputForm.jsx` at root and `src/components/InputForm.jsx`)
 
 ---
 
