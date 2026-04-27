@@ -29,21 +29,34 @@ async function processClaudeStage({ guestName, industry, show, style, duration }
     const compositorPromptPath = path.join(__dirname, '../../intelligence/compositor-prompt.md');
     let compositorPrompt = await fs.readFile(compositorPromptPath, 'utf-8');
 
-    // 5. Inject placeholders
-    const finalPrompt = compositorPrompt
+    // 5. Build prompts — static content (brand identity + show preset) goes into the system
+    // prompt with cache_control so Anthropic caches it for 5 minutes, cutting Stage 2 from
+    // ~27s to ~5-8s on cache hits when the same show is run more than once per session.
+    const systemText = `${brandIdentity}\n\n---\nSHOW CONFIGURATION:\n${showPresetRaw}`;
+
+    // Dynamic user prompt has BRAND_IDENTITY and SHOW_PRESET replaced with empty strings
+    // since those are now provided via the system prompt block above.
+    const dynamicPrompt = compositorPrompt
       .replace('{{GUEST_NAME}}', guestName || '')
       .replace('{{INDUSTRY}}', industry || '')
-      .replace('{{SHOW_PRESET}}', showPresetRaw)
+      .replace('{{SHOW_PRESET}}', '')
       .replace('{{STYLE_RECIPE}}', styleRecipe)
-      .replace('{{BRAND_IDENTITY}}', brandIdentity)
+      .replace('{{BRAND_IDENTITY}}', '')
       .replace('{{DURATION}}', duration || '');
 
     // 6. Call Claude API
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
+      max_tokens: 2000,
+      system: [
+        {
+          type: 'text',
+          text: systemText,
+          cache_control: { type: 'ephemeral' }
+        }
+      ],
       messages: [
-        { role: 'user', content: finalPrompt }
+        { role: 'user', content: dynamicPrompt }
       ]
     });
 
