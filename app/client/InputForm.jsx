@@ -44,18 +44,32 @@ export default function InputForm({ formData, setFormData }) {
         <option value="legacy-makers">Legacy Makers</option>
         <option value="women-in-power">Women in Power</option>
         <option value="operation-ceo">Operation CEO</option>
-        <option value="office-lockdown">Office Lockdown</option>
-        <option value="americas-top-lawyer">America's Top Lawyer</option>
-        <option value="general-awards">General / Awards</option>
+        <option value="americas-top-lawyers">America's Top Lawyers</option>
+        <option value="americas-best-doctors">America's Best Doctors</option>
+        <option value="kingdom-by-creator">Kingdom by Creator</option>
+        <option value="mompreneurs">Mompreneurs</option>
+        <option value="americas-top-trainers">America's Top Trainers</option>
+        <option value="builders-of-america">Builders of America</option>
+        <option value="americas-top-coaches">America's Top Coaches</option>
+        <option value="couples-empire">Couple's Empire</option>
+        <option value="americas-top-agents">America's Top Agents</option>
       </select>
 
-      <label style={labelStyle}>Prompt Style</label>
+      <label style={labelStyle}>Style</label>
       <select name="style" value={formData.style} onChange={handleChange} style={inputStyle}>
         <option value="">Select Style</option>
-        <option value="cinematic-gold">Cinematic Gold</option>
-        <option value="modern-corporate">Modern Corporate</option>
-        <option value="gritty-action">Gritty Action</option>
-        <option value="vibrant-tech">Vibrant Tech</option>
+        <option value="legacy-makers">Legacy Makers</option>
+        <option value="women-in-power">Women in Power</option>
+        <option value="operation-ceo">Operation CEO</option>
+        <option value="americas-top-lawyers">America's Top Lawyers</option>
+        <option value="americas-best-doctors">America's Best Doctors</option>
+        <option value="kingdom-by-creator">Kingdom by Creator</option>
+        <option value="mompreneurs">Mompreneurs</option>
+        <option value="americas-top-trainers">America's Top Trainers</option>
+        <option value="builders-of-america">Builders of America</option>
+        <option value="americas-top-coaches">America's Top Coaches</option>
+        <option value="couples-empire">Couple's Empire</option>
+        <option value="americas-top-agents">America's Top Agents</option>
       </select>
 
       <label style={labelStyle}>Episode Duration</label>

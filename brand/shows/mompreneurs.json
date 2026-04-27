@@ -1,0 +1,12 @@
+{
+  "showName": "Mompreneurs",
+  "primaryColour": "#B76E79",
+  "accentColour": "#F5E6D3",
+  "recommendedTemplate": "ornate",
+  "defaultOverlays": [
+    "floral-gold.png",
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/mompreneurs-badge.png",
+  "pexelsKeywordModifier": "bright minimalist home office soft sunlight warm inviting"
+}

@@ -1,0 +1,12 @@
+{
+  "showName": "America's Top Lawyers",
+  "primaryColour": "#8B6914",
+  "accentColour": "#C9A84C",
+  "recommendedTemplate": "legacy",
+  "defaultOverlays": [
+    "gold-frame.png",
+    "light-rays.png"
+  ],
+  "badgePath": "/brand/assets/badges/americas-top-lawyers-badge.png",
+  "pexelsKeywordModifier": "courtroom supreme court law library mahogany sunbeams"
+}

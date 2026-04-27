@@ -1,0 +1,12 @@
+{
+  "showName": "America's Top Trainers",
+  "primaryColour": "#FF4500",
+  "accentColour": "#808080",
+  "recommendedTemplate": "tactical",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "dark-vignette.png"
+  ],
+  "badgePath": "/brand/assets/badges/americas-top-trainers-badge.png",
+  "pexelsKeywordModifier": "industrial dark gym warehouse fitness crossfit arena dramatic"
+}

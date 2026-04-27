@@ -1,0 +1,12 @@
+{
+  "showName": "America's Best Doctors",
+  "primaryColour": "#00CCCC",
+  "accentColour": "#FFFFFF",
+  "recommendedTemplate": "tactical",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "light-rays.png"
+  ],
+  "badgePath": "/brand/assets/badges/americas-best-doctors-badge.png",
+  "pexelsKeywordModifier": "medical laboratory hospital clinic sterile modern"
+}

@@ -1,0 +1,12 @@
+{
+  "showName": "America's Top Coaches",
+  "primaryColour": "#006400",
+  "accentColour": "#FFFFFF",
+  "recommendedTemplate": "legacy",
+  "defaultOverlays": [
+    "geometric-lines.png",
+    "light-rays.png"
+  ],
+  "badgePath": "/brand/assets/badges/americas-top-coaches-badge.png",
+  "pexelsKeywordModifier": "modern boardroom glass wall strategy arena professional"
+}
